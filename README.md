@@ -1,11 +1,27 @@
 # YouTube Analytics Dashboard
 
-Data Scientist internship project completed at Prime Times Television as
+Data science internship project completed at Prime Times Television as
 part of the Junior Data Scientist internship. The project delivers an
 interactive Streamlit dashboard that pulls, analyzes, and visualizes
 performance data for any public YouTube channel using the YouTube Data
 API v3, and includes a machine-learning module for estimating expected
 video performance from title and format features.
+
+## Weekly Breakdown
+
+> Draft structure based on the project's real technical phases — adjust
+> the week numbers below to match what you actually worked on each week
+> before submitting.
+
+| Week | Focus |
+|------|-------|
+| Week 1–2 | Internship onboarding; learned the YouTube Data API v3 (quotas, endpoints, auth); scoped the dashboard requirements with company supervisor |
+| Week 3–4 | Built `youtube_api.py` — channel resolution (URL/handle/name), channel metadata fetching, paginated video/stats retrieval with quota-conscious batching |
+| Week 5–6 | Built `analytics.py` — feature engineering (duration parsing, title signals, posting-time features), engagement rate calculation, z-score outlier detection |
+| Week 7–8 | Built the machine learning module — `RandomForestRegressor` view predictor on `log1p`-transformed views, cross-validated evaluation, feature importance analysis |
+| Week 9–10 | Built `app.py` — full Streamlit dashboard UI, custom dark theme, tabbed layout (Overview / Deep Analytics / Performance Predictor), interactive charts |
+| Week 11 | Testing and debugging — wrote unit tests (`test_analytics.py`), fixed edge-case bugs (zero-view videos, hidden likes/disabled comments), added error handling for API failures |
+| Week 12 | Final polish — GitHub repository setup, documentation, live testing against real channels, internship report preparation |
 
 ## About the Project
 
