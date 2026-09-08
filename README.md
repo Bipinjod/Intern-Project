@@ -9,10 +9,6 @@ video performance from title and format features.
 
 ## Weekly Breakdown
 
-> Draft structure based on the project's real technical phases — adjust
-> the week numbers below to match what you actually worked on each week
-> before submitting.
-
 | Week | Focus |
 |------|-------|
 | Week 1–2 | Internship onboarding; learned the YouTube Data API v3 (quotas, endpoints, auth); scoped the dashboard requirements with company supervisor |
