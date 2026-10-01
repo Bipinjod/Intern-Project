@@ -34,19 +34,18 @@ st.markdown(
     """
     <style>
         :root {
-            --bg: #f3f6fb;
-            --bg-soft: #eef3f9;
+            --bg: #f4f7fb;
             --panel: #ffffff;
-            --panel-alt: #f8fafc;
-            --border: #dfe7f1;
-            --text: #162033;
-            --muted: #5b6982;
-            --primary: #1a73e8;
-            --primary-soft: rgba(26, 115, 232, 0.08);
-            --success: #1f9d61;
-            --success-soft: rgba(31, 157, 97, 0.08);
-            --warning: #d97706;
-            --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            --panel-soft: #f9fbff;
+            --border: #dfe6ee;
+            --text: #111827;
+            --muted: #5f6f85;
+            --primary: #0f172a;
+            --primary-soft: #edf3ff;
+            --accent: #2563eb;
+            --success: #0f766e;
+            --warning: #c26100;
+            --shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
         }
 
         .stApp {
@@ -55,7 +54,7 @@ st.markdown(
         }
 
         .block-container {
-            padding-top: 2rem;
+            padding-top: 1.8rem;
             padding-bottom: 3rem;
         }
 
@@ -68,10 +67,10 @@ st.markdown(
         }
 
         .hero-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f6f9fd 100%);
+            background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.3rem 1.4rem;
+            border-radius: 16px;
+            padding: 1.2rem 1.3rem;
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
         }
@@ -79,25 +78,25 @@ st.markdown(
         .metric-card {
             background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 1rem 1rem 0.9rem;
             margin-top: 0.5rem;
             height: 100%;
-            min-height: 128px;
+            min-height: 120px;
             box-shadow: var(--shadow);
         }
 
         .metric-label {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--muted);
             margin-bottom: 0.6rem;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .metric-value {
-            font-size: clamp(1.2rem, 2vw, 2rem);
+            font-size: clamp(1.1rem, 2vw, 1.9rem);
             font-weight: 700;
             color: var(--text);
             line-height: 1.2;
@@ -106,13 +105,13 @@ st.markdown(
         .metric-delta {
             font-size: 0.8rem;
             color: var(--muted);
-            margin-top: 0.45rem;
+            margin-top: 0.4rem;
         }
 
         .section-wrap {
             background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 18px;
+            border-radius: 16px;
             padding: 1rem 1rem 0.6rem;
             margin-top: 1rem;
             box-shadow: var(--shadow);
@@ -120,17 +119,18 @@ st.markdown(
 
         .insight-pill {
             display: inline-block;
-            padding: 0.38rem 0.8rem;
+            padding: 0.35rem 0.7rem;
             border-radius: 999px;
             background: var(--primary-soft);
-            border: 1px solid rgba(26, 115, 232, 0.12);
+            border: 1px solid rgba(15, 23, 42, 0.08);
             color: var(--primary);
-            font-size: 0.78rem;
-            font-weight: 600;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
 
         [data-testid="stSidebar"] {
-            background: #f7f9fc;
+            background: #f8fafc;
             border-right: 1px solid var(--border);
         }
 
@@ -145,13 +145,13 @@ st.markdown(
             color: var(--muted);
             border: 1px solid var(--border);
             background: transparent;
+            font-weight: 600;
         }
 
         .stTabs [role="tab"][aria-selected="true"] {
-            background: var(--primary-soft);
+            background: var(--panel-soft);
             color: var(--primary);
-            border-color: rgba(26, 115, 232, 0.14);
-            font-weight: 600;
+            border-color: rgba(15, 23, 42, 0.06);
         }
 
         .stDataFrame, .stTable {
@@ -167,16 +167,23 @@ st.markdown(
 
 def metric_card(label: str, value: str, delta: str = "", accent: str = "primary"):
     accent_style = {
-        "primary": "rgba(124, 58, 237, 0.18)",
-        "green": "rgba(34, 197, 94, 0.12)",
-        "blue": "rgba(56, 189, 248, 0.12)",
-        "orange": "rgba(249, 115, 22, 0.12)",
-    }.get(accent, "rgba(124, 58, 237, 0.18)")
+        "primary": "#eef4ff",
+        "green": "#edfdf5",
+        "blue": "#edf5ff",
+        "orange": "#fff3e8",
+    }.get(accent, "#eef4ff")
+
+    accent_border = {
+        "primary": "#1a73e8",
+        "green": "#1f9d61",
+        "blue": "#2563eb",
+        "orange": "#d97706",
+    }.get(accent, "#1a73e8")
 
     delta_html = f'<div class="metric-delta">{delta}</div>' if delta else ""
     st.markdown(
         f"""
-        <div class="metric-card" style="background: linear-gradient(180deg, {accent_style}, rgba(15, 23, 42, 0.88));">
+        <div class="metric-card" style="background: {accent_style}; border-left: 4px solid {accent_border};">
             <div class="metric-label">{label}</div>
             <div class="metric-value">{value}</div>
             {delta_html}
