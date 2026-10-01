@@ -34,19 +34,23 @@ st.markdown(
     """
     <style>
         :root {
-            --bg: #0f172a;
-            --panel: rgba(15, 23, 42, 0.72);
-            --panel-soft: rgba(30, 41, 59, 0.84);
-            --primary: #7c3aed;
-            --secondary: #22c55e;
-            --accent: #38bdf8;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --border: rgba(148, 163, 184, 0.2);
+            --bg: #f3f6fb;
+            --bg-soft: #eef3f9;
+            --panel: #ffffff;
+            --panel-alt: #f8fafc;
+            --border: #dfe7f1;
+            --text: #162033;
+            --muted: #5b6982;
+            --primary: #1a73e8;
+            --primary-soft: rgba(26, 115, 232, 0.08);
+            --success: #1f9d61;
+            --success-soft: rgba(31, 157, 97, 0.08);
+            --warning: #d97706;
+            --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
         }
 
         .stApp {
-            background: linear-gradient(135deg, #020817 0%, #0f172a 30%, #111827 100%);
+            background: var(--bg);
             color: var(--text);
         }
 
@@ -56,39 +60,40 @@ st.markdown(
         }
 
         .dashboard-shell {
-            background: rgba(15, 23, 42, 0.56);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 1.4rem 1.3rem 1.1rem;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
-            backdrop-filter: blur(10px);
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
         }
 
         .hero-card {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(56, 189, 248, 0.08));
-            border: 1px solid rgba(124, 58, 237, 0.35);
-            border-radius: 22px;
-            padding: 1.2rem 1.4rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f6f9fd 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.3rem 1.4rem;
             margin-bottom: 1rem;
+            box-shadow: var(--shadow);
         }
 
         .metric-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.8));
+            background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 1rem 1rem 0.85rem;
+            border-radius: 16px;
+            padding: 1rem 1rem 0.9rem;
             margin-top: 0.5rem;
             height: 100%;
             min-height: 128px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+            box-shadow: var(--shadow);
         }
 
         .metric-label {
-            font-size: 0.78rem;
-            letter-spacing: 0.06em;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--muted);
             margin-bottom: 0.6rem;
+            font-weight: 600;
         }
 
         .metric-value {
@@ -100,48 +105,59 @@ st.markdown(
 
         .metric-delta {
             font-size: 0.8rem;
-            color: #cbd5e1;
-            margin-top: 0.4rem;
+            color: var(--muted);
+            margin-top: 0.45rem;
         }
 
         .section-wrap {
-            background: rgba(15, 23, 42, 0.38);
+            background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 18px;
-            padding: 1rem 1rem 0.5rem;
+            padding: 1rem 1rem 0.6rem;
             margin-top: 1rem;
+            box-shadow: var(--shadow);
         }
 
         .insight-pill {
             display: inline-block;
-            padding: 0.35rem 0.75rem;
+            padding: 0.38rem 0.8rem;
             border-radius: 999px;
-            background: rgba(34, 197, 94, 0.18);
-            border: 1px solid rgba(34, 197, 94, 0.35);
-            color: #bbf7d0;
+            background: var(--primary-soft);
+            border: 1px solid rgba(26, 115, 232, 0.12);
+            color: var(--primary);
             font-size: 0.78rem;
             font-weight: 600;
         }
 
         [data-testid="stSidebar"] {
-            background: rgba(15, 23, 42, 0.82);
+            background: #f7f9fc;
             border-right: 1px solid var(--border);
         }
 
         .stTabs [role="tablist"] {
             gap: 0.5rem;
+            margin-bottom: 0.6rem;
         }
 
         .stTabs [role="tab"] {
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px;
             padding: 0.6rem 0.9rem;
-            color: var(--text);
-            border: 1px solid transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            background: transparent;
         }
 
         .stTabs [role="tab"][aria-selected="true"] {
-            background: rgba(124, 58, 237, 0.18);
-            border-color: rgba(124, 58, 237, 0.35);
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-color: rgba(26, 115, 232, 0.14);
+            font-weight: 600;
+        }
+
+        .stDataFrame, .stTable {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
         }
     </style>
     """,
@@ -221,11 +237,11 @@ st.markdown(
     <div class="hero-card">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
             <div>
-                <div class="insight-pill">Dashboard</div>
-                <h1 style="margin:0.5rem 0 0.2rem; font-size:2.2rem; color:#f8fafc;">YouTube Channel Analytics</h1>
-                <p style="margin:0; color:#cbd5e1;">Track channel momentum, content performance, and the factors behind each upload.</p>
+                <div class="insight-pill">Final-year analytics dashboard</div>
+                <h1 style="margin:0.5rem 0 0.2rem; font-size:2.05rem; color:#162033; letter-spacing:-0.03em;">YouTube Channel Analytics</h1>
+                <p style="margin:0; color:#54657d; max-width:60ch;">A practical dashboard for measuring channel momentum, identifying top-performing uploads, and understanding what drives audience response.</p>
             </div>
-            <div style="padding:0.5rem 0.8rem; border-radius:12px; background:rgba(15,23,42,0.5); border: 1px solid rgba(148,163,184,0.25); color:#e2e8f0; font-weight:600;">
+            <div style="padding:0.6rem 0.9rem; border-radius:12px; background:#f8fafc; border: 1px solid #dfe7f1; color:#324154; font-weight:600;">
                 Live channel insights
             </div>
         </div>
@@ -348,7 +364,7 @@ if st.session_state.channel_info:
                 plot_bgcolor="rgba(0,0,0,0)",
                 margin=dict(l=10, r=10, t=10, b=10),
             )
-            st.plotly_chart(fig_views, use_container_width=True)
+            st.plotly_chart(fig_views, width="stretch")
 
             col1, col2 = st.columns(2)
             with col1:
@@ -361,7 +377,7 @@ if st.session_state.channel_info:
                     plot_bgcolor="rgba(0,0,0,0)",
                     margin=dict(l=10, r=10, t=10, b=10),
                 )
-                st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar, width="stretch")
             with col2:
                 st.subheader("Engagement Rate Distribution")
                 fig_hist = px.histogram(df, x="engagement_rate", nbins=20, template="plotly_dark")
@@ -370,12 +386,12 @@ if st.session_state.channel_info:
                     plot_bgcolor="rgba(0,0,0,0)",
                     margin=dict(l=10, r=10, t=10, b=10),
                 )
-                st.plotly_chart(fig_hist, use_container_width=True)
+                st.plotly_chart(fig_hist, width="stretch")
 
             st.subheader("Video Data")
             display_df = df[["title", "published_at", "views", "likes", "comments", "engagement_rate", "views_per_day"]].copy()
             display_df["published_at"] = display_df["published_at"].dt.strftime("%Y-%m-%d")
-            st.dataframe(display_df, use_container_width=True, hide_index=True)
+            st.dataframe(display_df, width="stretch", hide_index=True)
 
             csv = df.to_csv(index=False).encode("utf-8")
             st.download_button("Download data as CSV", csv, "youtube_video_stats.csv", "text/csv")
@@ -390,7 +406,7 @@ if st.session_state.channel_info:
                 if not outliers.empty:
                     st.dataframe(
                         outliers[["title", "views", "view_zscore"]].sort_values("view_zscore", ascending=False),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                     )
                 else:
@@ -400,7 +416,7 @@ if st.session_state.channel_info:
                 if not underperformers.empty:
                     st.dataframe(
                         underperformers[["title", "views", "view_zscore"]].sort_values("view_zscore"),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                     )
                 else:
@@ -424,7 +440,7 @@ if st.session_state.channel_info:
                     plot_bgcolor="rgba(0,0,0,0)",
                     margin=dict(l=10, r=10, t=10, b=10),
                 )
-                st.plotly_chart(fig_days, use_container_width=True)
+                st.plotly_chart(fig_days, width="stretch")
                 best_day = posting_stats.loc[posting_stats["avg_views"].idxmax(), "day_of_week"]
                 st.caption(f"Based on this sample, **{best_day}** uploads perform best on average.")
 
@@ -448,7 +464,7 @@ if st.session_state.channel_info:
                     plot_bgcolor="rgba(0,0,0,0)",
                     margin=dict(l=10, r=10, t=10, b=10),
                 )
-                st.plotly_chart(fig_dur, use_container_width=True)
+                st.plotly_chart(fig_dur, width="stretch")
             with fc2:
                 st.markdown("**Title Length vs Views**")
                 fig_title = px.scatter(
@@ -464,7 +480,7 @@ if st.session_state.channel_info:
                     plot_bgcolor="rgba(0,0,0,0)",
                     margin=dict(l=10, r=10, t=10, b=10),
                 )
-                st.plotly_chart(fig_title, use_container_width=True)
+                st.plotly_chart(fig_title, width="stretch")
 
             st.divider()
             st.subheader("📊 Correlation with Views")
@@ -494,7 +510,7 @@ if st.session_state.channel_info:
                 plot_bgcolor="rgba(0,0,0,0)",
                 margin=dict(l=10, r=10, t=10, b=10),
             )
-            st.plotly_chart(fig_corr, use_container_width=True)
+            st.plotly_chart(fig_corr, width="stretch")
             st.caption(
                 "Correlation ranges from -1 to 1. Values near 0 mean little linear "
                 "relationship — doesn't rule out a non-linear effect, which is what "
@@ -553,7 +569,7 @@ if st.session_state.channel_info:
                         plot_bgcolor="rgba(0,0,0,0)",
                         margin=dict(l=10, r=10, t=10, b=10),
                     )
-                    st.plotly_chart(fig_imp, use_container_width=True)
+                    st.plotly_chart(fig_imp, width="stretch")
 
                     st.divider()
                     st.markdown("**Try it: estimate views for a hypothetical video**")
