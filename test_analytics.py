@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 
 from analytics import parse_iso8601_duration, add_engineered_features, flag_outliers
+from config import load_config
 
 
 # ----------------------------------------------------------------------------
@@ -106,3 +107,60 @@ def test_flag_outliers_handles_zero_variance():
 
     assert (result["view_zscore"] == 0.0).all()
     assert not result["is_viral_outlier"].any()
+
+
+# ----------------------------------------------------------------------------
+# youtube_api safety checks
+# ----------------------------------------------------------------------------
+def test_get_video_stats_skips_incomplete_api_items():
+    class _DummyVideosList:
+        def __init__(self, payload):
+            self.payload = payload
+
+        def execute(self):
+            return self.payload
+
+    class _DummyYoutube:
+        def __init__(self, payload):
+            self._payload = payload
+
+        def videos(self):
+            return self
+
+        def list(self, **kwargs):
+            return _DummyVideosList(self._payload)
+
+    from youtube_api import YouTubeAnalytics
+
+    valid_item = {
+        "id": "vid-1",
+        "snippet": {
+            "title": "Valid video",
+            "publishedAt": "2026-01-05T10:00:00Z",
+            "thumbnails": {"medium": {"url": "https://example.com/thumb.jpg"}},
+        },
+        "statistics": {"viewCount": "100", "likeCount": "20", "commentCount": "5"},
+        "contentDetails": {"duration": "PT3M"},
+    }
+    invalid_item = {
+        "id": "vid-2",
+        "snippet": {"title": "Missing publishedAt"},
+        "statistics": {},
+        "contentDetails": {},
+    }
+
+    yt = YouTubeAnalytics("fake-key", youtube_client=_DummyYoutube({"items": [valid_item, invalid_item]}))
+    df = yt.get_video_stats(["vid-1", "vid-2"])
+
+    assert len(df) == 1
+    assert df.loc[0, "title"] == "Valid video"
+    assert df.loc[0, "views"] == 100
+    assert df.loc[0, "engagement_rate"] == 25.0
+
+
+def test_load_config_rejects_missing_key_in_production(monkeypatch):
+    monkeypatch.setenv("APP_MODE", "production")
+    monkeypatch.delenv("YOUTUBE_API_KEY", raising=False)
+
+    with pytest.raises(ValueError, match="YOUTUBE_API_KEY"):
+        load_config()

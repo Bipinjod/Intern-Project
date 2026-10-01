@@ -5,13 +5,12 @@ Prime Times Television — Junior Data Scientist Internship Project
 Run with: streamlit run app.py
 """
 
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from dotenv import load_dotenv
 from googleapiclient.errors import HttpError
 
+from config import load_config
 from youtube_api import YouTubeAnalytics
 from analytics import (
     add_engineered_features,
@@ -21,7 +20,13 @@ from analytics import (
     predict_views,
 )
 
-load_dotenv()
+try:
+    SETTINGS = load_config()
+except ValueError as exc:
+    SETTINGS = None
+    STARTUP_ERROR = str(exc)
+else:
+    STARTUP_ERROR = None
 
 st.set_page_config(page_title="YouTube Analytics Dashboard", page_icon="📊", layout="wide")
 
@@ -169,7 +174,7 @@ def metric_card(label: str, value: str, delta: str = "", accent: str = "primary"
 # Cached fetch functions — avoids re-hitting the API (and burning quota)
 # every time a widget triggers a rerun.
 # ----------------------------------------------------------------------------
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=SETTINGS.cache_ttl if SETTINGS else 3600, show_spinner=False)
 def fetch_channel_data(api_key: str, channel_input: str, max_videos: int):
     yt = YouTubeAnalytics(api_key)
     channel_id = yt.resolve_channel_id(channel_input)
@@ -185,13 +190,17 @@ def fetch_channel_data(api_key: str, channel_input: str, max_videos: int):
 st.sidebar.title("📊 YouTube Analytics")
 st.sidebar.markdown("Analyze any public channel and uncover what makes its content perform.")
 
-api_key = os.getenv("YOUTUBE_API_KEY")
+if SETTINGS is None:
+    st.error(STARTUP_ERROR)
+    st.stop()
+
+api_key = SETTINGS.api_key
 
 channel_input = st.sidebar.text_input(
     "Channel URL, @handle, or name",
     placeholder="e.g. @MrBeast or https://youtube.com/@MrBeast",
 )
-max_videos = st.sidebar.slider("Number of recent videos to pull", 10, 100, 30, step=10)
+max_videos = st.sidebar.slider("Number of recent videos to pull", 10, 100, SETTINGS.max_videos_default, step=10)
 fetch_button = st.sidebar.button("Analyze Channel", type="primary")
 
 st.sidebar.divider()

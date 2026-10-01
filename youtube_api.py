@@ -22,10 +22,19 @@ from googleapiclient.discovery import build
 
 
 class YouTubeAnalytics:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, youtube_client=None):
         if not api_key:
             raise ValueError("YouTube API key is missing. Check your .env file.")
-        self.youtube = build("youtube", "v3", developerKey=api_key)
+        self.youtube = youtube_client or build("youtube", "v3", developerKey=api_key)
+
+    @staticmethod
+    def _safe_int(value, default=0):
+        if value is None or value == "":
+            return default
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
 
     # ------------------------------------------------------------------
     # Channel resolution
@@ -91,16 +100,22 @@ class YouTubeAnalytics:
         if not items:
             raise ValueError("Channel not found.")
         item = items[0]
-        stats = item["statistics"]
+        snippet = item.get("snippet") or {}
+        stats = item.get("statistics") or {}
+        content_details = item.get("contentDetails") or {}
+        related_playlists = content_details.get("relatedPlaylists") or {}
+        uploads_playlist_id = related_playlists.get("uploads")
+        if not uploads_playlist_id:
+            raise ValueError("Channel uploads playlist not found.")
         return {
             "channel_id": channel_id,
-            "title": item["snippet"]["title"],
-            "description": item["snippet"].get("description", ""),
-            "thumbnail": item["snippet"]["thumbnails"]["high"]["url"],
-            "subscriber_count": int(stats.get("subscriberCount", 0)),
-            "view_count": int(stats.get("viewCount", 0)),
-            "video_count": int(stats.get("videoCount", 0)),
-            "uploads_playlist_id": item["contentDetails"]["relatedPlaylists"]["uploads"],
+            "title": snippet.get("title", "Unknown channel"),
+            "description": snippet.get("description", ""),
+            "thumbnail": ((snippet.get("thumbnails") or {}).get("high") or {}).get("url", ""),
+            "subscriber_count": self._safe_int(stats.get("subscriberCount", 0)),
+            "view_count": self._safe_int(stats.get("viewCount", 0)),
+            "video_count": self._safe_int(stats.get("videoCount", 0)),
+            "uploads_playlist_id": uploads_playlist_id,
         }
 
     # ------------------------------------------------------------------
@@ -138,26 +153,38 @@ class YouTubeAnalytics:
             ).execute()
 
             for item in resp.get("items", []):
-                stats = item.get("statistics", {})
-                snippet = item["snippet"]
+                if not isinstance(item, dict):
+                    continue
+
+                item_id = item.get("id")
+                if not item_id:
+                    continue
+
+                stats = item.get("statistics") or {}
+                snippet = item.get("snippet") or {}
+                content_details = item.get("contentDetails") or {}
+
+                title = snippet.get("title")
+                published_at = snippet.get("publishedAt")
+                duration = content_details.get("duration")
+                if not title or not published_at or not duration:
+                    continue
+
                 # YouTube omits these keys entirely (rather than sending 0)
                 # when a creator hides the like count or disables comments.
-                # Treating a missing key the same as a real 0 would quietly
-                # understate engagement for those videos, so track it
-                # explicitly instead of just defaulting to 0.
                 likes_hidden = "likeCount" not in stats
                 comments_disabled = "commentCount" not in stats
                 rows.append({
-                    "video_id": item["id"],
-                    "title": snippet["title"],
-                    "published_at": snippet["publishedAt"],
-                    "thumbnail": snippet["thumbnails"]["medium"]["url"],
-                    "views": int(stats.get("viewCount", 0)),
-                    "likes": int(stats.get("likeCount", 0)),
-                    "comments": int(stats.get("commentCount", 0)),
+                    "video_id": item_id,
+                    "title": title,
+                    "published_at": published_at,
+                    "thumbnail": ((snippet.get("thumbnails") or {}).get("medium") or {}).get("url", ""),
+                    "views": self._safe_int(stats.get("viewCount", 0)),
+                    "likes": self._safe_int(stats.get("likeCount", 0)),
+                    "comments": self._safe_int(stats.get("commentCount", 0)),
                     "likes_hidden": likes_hidden,
                     "comments_disabled": comments_disabled,
-                    "duration": item["contentDetails"]["duration"],
+                    "duration": duration,
                 })
 
         df = pd.DataFrame(rows)
@@ -168,14 +195,8 @@ class YouTubeAnalytics:
             # Use np.nan (not pd.NA) for the zero-views guard — pd.NA forces
             # the Series to object dtype, and object-dtype Series containing
             # pd.NA raise TypeError on .round() (NAType has no __round__).
-            # This would crash the whole app on any channel with a video
-            # currently sitting at 0 views (e.g. just-published, or a live
-            # stream that hasn't started accumulating views yet).
             views_safe = df["views"].astype(float).replace(0, np.nan)
             engagement = (df["likes"] + df["comments"]) / views_safe * 100
-            # Excluded (set to NaN) for videos where likes or comments are
-            # unmeasurable, so they don't drag the average down as if they
-            # genuinely got zero engagement.
             unmeasurable = df["likes_hidden"] | df["comments_disabled"]
             df["engagement_rate"] = engagement.where(~unmeasurable).round(2)
         return df
